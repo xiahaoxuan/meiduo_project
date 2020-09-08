@@ -31,10 +31,10 @@ SECRET_KEY = 'x0jb!+h53x@1p6$nrk%7_w%86l3l2j^89u5^bfvkd6%enli9p&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.103']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.105']
 
 
-DEV_URL = '192.168.0.103'  # 192.168.0.103
+DEV_URL = '192.168.0.105'  # 192.168.0.105
 
 
 # Application definition
@@ -105,7 +105,7 @@ DATABASES = {
 
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
-        'HOST': DEV_URL,  # 数据库主机 192.168.0.103 127.0.0.1
+        'HOST': DEV_URL,  # 数据库主机 192.168.0.105 127.0.0.1
         'PORT': 3306,  # 数据库端口
         'USER': 'xhx_meiduo',  # 数据库用户名
         'PASSWORD': '54Haoxuan!',  # 数据库用户密码
