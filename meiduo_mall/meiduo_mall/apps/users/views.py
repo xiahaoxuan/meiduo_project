@@ -138,7 +138,9 @@ class LogoutView(View):
     def get(self, request):
         logout(request)
         response = redirect(reverse('contents:index'))
+        # response.set_cookie('username', max_age=-1)
         response.delete_cookie('username')
+
         return response
 
 
