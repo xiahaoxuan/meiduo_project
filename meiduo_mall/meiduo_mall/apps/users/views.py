@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django import http
+from django.db import DatabaseError
+from django.contrib.auth import login, authenticate
 import re
 from django.urls import reverse
 from django_redis import get_redis_connection
+
 from users.models import User
-from django.db import DatabaseError
-from django.contrib.auth import login
 from meiduo_mall.utils.response_code import RETCODE
 
 # Create your views here.
@@ -85,11 +86,40 @@ class LoginView(View):
 
     def get(self, request):
         """提供界面"""
-        return  render(request, 'login.html', )
+        return render(request, 'login.html', {'login_errmsg': '登录失败'})
         pass
 
     def post(self, request):
         """实现用户登录逻辑"""
-        pass
+        # 接收参数
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remembered = request.POST.get('remembered')
+        # 校验参数
+        # 判断参数是否齐全
+        if not all([username, password]):
+            return http.HttpResponseForbidden('缺少必传参数')
 
-        pass
+        # 判断用户名是否是5-20个字符
+        if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
+            return http.HttpResponseForbidden('请输入正确的用户名或手机号')
+
+        # 判断密码是否是8-20个数字
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
+            return http.HttpResponseForbidden('密码最少8位，最长20位')
+        # 认证用户: 使用账户查询用户是否存在，如果用户存在，再校验密码是否正确
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return render(request, 'login.html', {'account_errmsg': '账号或密码错误'})
+        # 状态保持
+        login(request, user)
+        # 使用remembered
+        if remembered != 'on':
+            # 没有记住登录
+            request.session.set_expiry(0)
+        else:
+            # 记住登录状态保持周期为两周
+            request.session.set_expiry(None)
+
+        # 响应结果
+        return redirect(reverse('contents:index'))

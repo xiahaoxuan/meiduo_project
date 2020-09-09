@@ -230,4 +230,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # 指定自定义的用户模型类
 AUTH_USER_MODEL = 'users.User'
 
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
+
 
