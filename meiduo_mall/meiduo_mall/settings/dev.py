@@ -233,3 +233,7 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
 
 
+# 判断用户是都登录后，指定未登录用户重定向的地址
+LOGIN_URL = '/login/'
+
+

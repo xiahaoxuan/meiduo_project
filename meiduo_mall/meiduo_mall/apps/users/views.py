@@ -1,10 +1,12 @@
-from django.shortcuts import render, redirect
-from django import http
-from django.db import DatabaseError
-from django.contrib.auth import login, authenticate
 import re
+
+from django import http
 from django.urls import reverse
+from django.db import DatabaseError
 from django_redis import get_redis_connection
+from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import login, authenticate, logout
 
 from users.models import User
 from meiduo_mall.utils.response_code import RETCODE
@@ -120,6 +122,32 @@ class LoginView(View):
         else:
             # 记住登录状态保持周期为两周
             request.session.set_expiry(None)
+        next_url = request.GET.get('next')
+        if next_url:
+            response = redirect(next_url)
+        else:
+            response = redirect(reverse('contents:index'))
 
+        response.set_cookie('username', user.username, max_age=3600*24*15)
         # 响应结果
-        return redirect(reverse('contents:index'))
+        return response
+
+
+class LogoutView(View):
+
+    def get(self, request):
+        logout(request)
+        response = redirect(reverse('contents:index'))
+        response.delete_cookie('username')
+        return response
+
+
+class UserInfoView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'user_center_info.html')
+
+
+
+
+
+
