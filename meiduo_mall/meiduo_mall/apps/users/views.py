@@ -1,4 +1,4 @@
-import re,json,logging
+import re, json, logging
 
 from django.views import View
 from django import http
@@ -12,6 +12,7 @@ from django.contrib.auth import login, authenticate, logout
 from users.models import User
 from meiduo_mall.utils.response_code import RETCODE
 from meiduo_mall.utils.views import LoginRequiredJsonMixin
+from celery_task.email.tasks import send_verify_email
 
 # Create your views here.
 
@@ -183,6 +184,9 @@ class EmailView(LoginRequiredJsonMixin, View):
         except Exception as e:
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
+        # 发邮件
+        verify_url = 'www.baidu.com'
+        send_verify_email.delay(email, verify_url)
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
 
 
