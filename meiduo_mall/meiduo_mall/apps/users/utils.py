@@ -1,9 +1,26 @@
 # 自定义用户认证的后端
 import re
 
+from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
 
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 from users.models import User
+from . import constants
+
+
+def generate_verify_email_url(user):
+    """生成邮箱激活链接"""
+    s = Serializer(settings.SECRET_KEY, constants.VERIFY_EMAIL_TOKEN_EXPIRES)
+    data = {'user_id': user.id, 'email': user.email}
+    token = s.dumps(data)
+    #
+    email_url = settings.EMAIL_VERIFY_URL+'?token='+token.decode()
+    return email_url
+
+
+
 
 
 def get_user_by_account(account):
