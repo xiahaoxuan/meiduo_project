@@ -6,7 +6,6 @@ let vm = new Vue({
         mobile: mobile,
         email: email,
         email_active: email_active,
-
         set_email: false,
         error_email: false,
 

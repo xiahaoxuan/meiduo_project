@@ -34,7 +34,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'www.meiduo.site']
 
 
-DEV_URL = '192.168.0.105'  # 192.168.0.105
+DEV_URL = '192.168.0.107'  # 192.168.0.105
 
 
 # Application definition

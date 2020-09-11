@@ -1,5 +1,6 @@
-import re
+import re,json,logging
 
+from django.views import View
 from django import http
 from django.urls import reverse
 from django.db import DatabaseError
@@ -10,9 +11,12 @@ from django.contrib.auth import login, authenticate, logout
 
 from users.models import User
 from meiduo_mall.utils.response_code import RETCODE
+from meiduo_mall.utils.views import LoginRequiredJsonMixin
 
 # Create your views here.
-from django.views import View
+
+
+logger = logging.getLogger('django')
 
 
 class UsernameCountView(View):
@@ -79,8 +83,14 @@ class RegisterView(View):
         except DatabaseError:
             return render(request, 'register.html', {'register_errmsg': '注册失败'})
         login(request, user)
-        # return redirect('/')
-        return redirect(reverse('contents:index'))
+        next_url = request.GET.get('next')
+        if next_url:
+            response = redirect(next_url)
+        else:
+            response = redirect(reverse('contents:index'))
+
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 15)
+        return response
 
 
 class LoginView(View):
@@ -140,13 +150,41 @@ class LogoutView(View):
         response = redirect(reverse('contents:index'))
         # response.set_cookie('username', max_age=-1)
         response.delete_cookie('username')
-
         return response
 
 
 class UserInfoView(LoginRequiredMixin, View):
+    """用户中心页面"""
     def get(self, request):
-        return render(request, 'user_center_info.html')
+        context = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active,
+        }
+        return render(request, 'user_center_info.html', context=context)
+
+
+class EmailView(LoginRequiredJsonMixin, View):
+    def put(self, request):
+        # 接收参数
+        json_str = request.body.decode()
+        json_dict = json.loads(json_str)
+        email = json_dict.get('email')
+        # 校验参数
+        if not email:
+            return http.HttpResponseForbidden('缺少email参数')
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('参数email有误')
+        try:
+            # 将用户传入的邮箱保存到数据库的email的数据库
+            request.user.email = email
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
+
 
 
 
