@@ -13,7 +13,7 @@ from users.models import User
 from meiduo_mall.utils.response_code import RETCODE
 from meiduo_mall.utils.views import LoginRequiredJsonMixin
 from celery_task.email.tasks import send_verify_email
-from users.utils import generate_verify_email_url
+from users.utils import generate_verify_email_url, check_verify_email_id
 
 # Create your views here.
 
@@ -191,6 +191,27 @@ class EmailView(LoginRequiredJsonMixin, View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
 
 
+class VerifyEmailView(View):
+    def get(self, request):
+        token = request.GET.get('token')
+        if not token:
+            return http.HttpResponseForbidden('token失效')
+        user = check_verify_email_id(token)
+        if not user:
+            return http.HttpResponseBadRequest('无效的token')
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseServerError('激活邮箱失败')
+        return redirect(reverse('users:info'))
+
+
+
+
+
+        pass
 
 
 

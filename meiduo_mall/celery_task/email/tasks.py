@@ -7,8 +7,8 @@ import logging
 logger = logging.getLogger('django')
 
 
-@celery_app.task(name='send_verify_email')
-def send_verify_email(to_email, verify_url):
+@celery_app.task(bind=True, name='send_verify_email', retry_backoff=3)
+def send_verify_email(self, to_email, verify_url):
     subject = "美多商城邮箱验证"
     html_message = '<p>尊敬的用户您好！</p>' \
                    '<p>感谢您使用美多商城。</p>' \
@@ -19,5 +19,6 @@ def send_verify_email(to_email, verify_url):
     except Exception as e:
         logger.error(e)
         # 触发错误重试：最多重新3次
+        raise self.retry(exec=e, max_retries=3)
 
 
