@@ -21,7 +21,6 @@ print(BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
@@ -34,7 +33,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'www.meiduo.site']
 
 
-DEV_URL = '192.168.0.107'  # 192.168.0.105
+DEV_URL = '192.168.0.107'  # 192.168.0.107
 
 
 # Application definition
@@ -50,6 +49,7 @@ INSTALLED_APPS = [
     'contents',
     'verifications',
     'oauth',
+    'areas',
 ]
 
 MIDDLEWARE = [

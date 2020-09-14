@@ -1,6 +1,5 @@
 from django.urls import path, re_path
 
-
 from . import views
 
 urlpatterns = [
@@ -13,5 +12,9 @@ urlpatterns = [
     path('info/', views.UserInfoView.as_view(), name='info'),
     path('emails/', views.EmailView.as_view(), name='emails'),
     path('emails/verification/', views.VerifyEmailView.as_view()),
-
+    path('addresses/', views.AddressView.as_view(), name='address'),
+    path('addresses/create/', views.AddressCreateView.as_view()),
+    re_path(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDeleteAddressView.as_view()),
+    re_path(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view()),
+    re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view()),
 ]
