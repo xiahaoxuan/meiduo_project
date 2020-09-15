@@ -1,7 +1,7 @@
 from . import views
 
-from django.urls import path
+from django.urls import path, re_path
 
-# urlpatterns = [
-#     path('', views.IndexView.as_view()),
-# ]
+urlpatterns = [
+    re_path(r'^list/(?P<category_id>\d+)/(?P<page_num>\d+)/$', views.ListView.as_view()),
+]
