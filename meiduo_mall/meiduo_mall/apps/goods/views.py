@@ -1,20 +1,73 @@
+from datetime import datetime
+import logging
+
 from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import View
 from django import http
 
-from goods.models import GoodsCategory, SKU
+from goods.models import GoodsCategory, SKU, GoodsVisitCount
 from contents.utils import get_categories
 from goods.utils import get_breadcrumb
 # Create your views here.
+from meiduo_mall.utils.response_code import RETCODE
 
 
-# class DetailView(View):
-#     def get(self, request, sku_id):
-#         return render(request, 'detail.html')
+logger = logging.getLogger('django')
+
+
+class DetailVisitView(View):
+    def post(self, request, category_id):
+        try:
+            category = GoodsCategory.objects.get(id=category_id)
+        except GoodsCategory.DoesNotExist:
+            return http.HttpResponseForbidden('category_id不存在')
+        t = timezone.localtime()
+        today_str = '%d-%02d-%02d' % (t.year, t.month, t.day)
+        today_date = datetime.strptime(today_str, '%Y-%m-%d')
+        try:
+            # 查询今天该类别的商品的访问量
+            counts_data = category.goodsvisitcount_set.get(date=today_date)
+        except GoodsVisitCount.DoesNotExist:
+            # 如果该类别的商品在今天没有过访问记录，就新建一个访问记录
+            counts_data = GoodsVisitCount()
+        try:
+            counts_data.category = category
+            counts_data.count += 1
+            counts_data.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseServerError('服务器异常')
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
+
+
+class DetailView(View):
+    """商品详情"""
+    def get(self, request, sku_id):
+        # 接收参数 校验参数
+        try:
+            # 查询sku
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            # return http.HttpResponseNotFound('sku_id 不存在')
+            return render(request, '404.html')
+        # 查询商品分类
+        categories = get_categories()
+        # 查询面包屑导航
+        breadcrumb = get_breadcrumb(sku.category)
+        # 构造上下文
+        context = {
+            'categories': categories,
+            'breadcrumb': breadcrumb,
+            'sku': sku,
+        }
+        return render(request, 'detail.html', context)
 
 
 class ListView(View):
+    """商品列表"""
     def get(self, request, category_id, page_num):
         # 接收参数
         try:

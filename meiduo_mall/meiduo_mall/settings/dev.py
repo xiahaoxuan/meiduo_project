@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'oauth',
     'areas',
     'goods',
+    'carts',
     'haystack',
 ]
 
@@ -140,6 +141,24 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
+    "history": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://"+DEV_URL+":6379/3",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        },
+    "carts": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://"+DEV_URL+":6379/4",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+    },
+
+
+
+
 
 
 

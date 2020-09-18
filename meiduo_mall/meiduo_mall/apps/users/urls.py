@@ -17,4 +17,5 @@ urlpatterns = [
     re_path(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDeleteAddressView.as_view()),
     re_path(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view()),
     re_path(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view()),
+    path('browse_histories/', views.UserBrowserHistory.as_view(), name='browse_histories'),
 ]
