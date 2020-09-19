@@ -1,4 +1,5 @@
 import re, json, logging
+import pickle, base64
 
 from django.views import View
 from django import http
@@ -16,6 +17,7 @@ from meiduo_mall.utils.views import LoginRequiredJsonMixin
 from celery_task.email.tasks import send_verify_email
 from users.utils import generate_verify_email_url, check_verify_email_id
 from goods.models import SKU
+from carts.utils import merge_cart_cookie_to_redis
 
 # Create your views here.
 
@@ -380,6 +382,7 @@ class LoginView(View):
             response = redirect(reverse('contents:index'))
 
         response.set_cookie('username', user.username, max_age=3600*24*15)
+        response = merge_cart_cookie_to_redis(request=request, user=user, response=response)
         # 响应结果
         return response
 
